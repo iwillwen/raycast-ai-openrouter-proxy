@@ -1,0 +1,19 @@
+services:
+  raycast-ai-proxy:
+    restart: unless-stopped
+    build: .
+    # The proxy runs on port 3000 inside the container.
+    # Change the host port if needed.
+    # You need to set this port in Raycast settings.
+    ports:
+      - "11435:3000"
+    # Mount the local 'models.json' file into the container.
+    # This file contains the model definitions used by the proxy.
+    volumes:
+      - ./models.json:/app/models.json:ro
+    environment:
+      # Set the OpenRouter API key as an environment variable.
+      # For production environments, it's highly recommended to use
+      # a .env file or Docker secrets for sensitive information like API keys,
+      # rather than hardcoding them here.
+      - API_KEY=YOUR_OPENROUTER_API_KEY
