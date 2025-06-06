@@ -12,8 +12,12 @@ services:
     volumes:
       - ./models.json:/app/models.json:ro
     environment:
-      # Set the OpenRouter API key as an environment variable.
+      # Set the API key as an environment variable.
       # For production environments, it's highly recommended to use
       # a .env file or Docker secrets for sensitive information like API keys,
       # rather than hardcoding them here.
-      - API_KEY=YOUR_OPENROUTER_API_KEY
+      - API_KEY=YOUR_API_KEY
+      # Set the base URL for the API.
+      # This should be an OpenAI-compatible API endpoint.
+      # The default is OpenRouter.
+      - BASE_URL=https://openrouter.ai/api/v1

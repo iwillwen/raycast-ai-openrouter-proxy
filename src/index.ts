@@ -11,7 +11,7 @@ async function main() {
   const logger = makeLogger();
   const middleware = makeMiddleware(logger);
   const openai = new OpenAI({
-    baseURL: 'https://openrouter.ai/api/v1',
+    baseURL: config.baseUrl,
     apiKey: config.apiKey,
   });
   const app = makeApp({ config, middleware, models, openai });

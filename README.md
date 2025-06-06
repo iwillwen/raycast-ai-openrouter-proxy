@@ -1,10 +1,10 @@
 # Raycast AI OpenRouter Proxy
 
-This project provides a proxy server that allows Raycast AI to utilize any model available on OpenRouter. This brings "Bring Your Own Key" (BYOK) functionality to Raycast AI, meaning you can use your OpenRouter API key and models.
+This project provides a proxy server that allows Raycast AI to utilize models from any OpenAI-compatible API (OpenAI, Gemini, OpenRouter, etc.). This brings "Bring Your Own Key" (BYOK) functionality to Raycast AI, meaning you can use your own API key and models from your chosen provider. By default, the proxy is configured to use OpenRouter.
 
 **No Raycast Pro subscription required!** 🎉
 
-This proxy allows using OpenRouter models inside Raycast, including **AI Chat**, **AI Commands**, **Quick AI**, and **AI Presets**, giving you Raycast's native AI experience with the flexibility of OpenRouter models and your own API key.
+This proxy allows using custom models inside Raycast, including **AI Chat**, **AI Commands**, **Quick AI**, and **AI Presets**, giving you Raycast's native AI experience with the flexibility of custom models and your own API key.
 
 > [!WARNING]
 >
@@ -14,11 +14,11 @@ This proxy allows using OpenRouter models inside Raycast, including **AI Chat**,
 
 ## Features
 
-This proxy aims to provide a seamless experience for using OpenRouter models within Raycast. Here's what is supported and what is not:
+This proxy aims to provide a seamless experience for using custom models within Raycast. Here's what is supported and what is not:
 
 ### Supported:
 
-- 🧠 **Any OpenRouter model**: Access the wide range of models offered by OpenRouter.
+- 🧠 **Any model**: Access the wide range of models offered by OpenAI-compatible providers. OpenRouter is used by default.
 - 👀 **Vision support**: Use models capable of processing images.
 - 🛠️ **AI Extensions & MCP**: Use your favorite AI Extensions and MCP servers. Note that Ollama tool calling support is experimental in Raycast.
 - 📝 **System instructions**: Provide system-level prompts to guide model behavior.
@@ -36,7 +36,7 @@ This proxy aims to provide a seamless experience for using OpenRouter models wit
 ## Requirements
 
 - Docker
-- OpenRouter API key
+- API key for your chosen provider (e.g., OpenRouter)
 
 ## Getting Started
 
@@ -54,7 +54,7 @@ To get started, follow these steps:
    cd raycast-ai-openrouter-proxy
    ```
 
-3. Set your OpenRouter API key in the Docker Compose file. Open the `docker-compose.yml` file and replace `YOUR_OPENROUTER_API_KEY` with your actual OpenRouter API key.
+3. Configure your provider in the Docker Compose file. Open the `docker-compose.yml` file and replace `YOUR_API_KEY` with your API key. By default, the proxy uses OpenRouter. To use a different OpenAI-compatible provider, change the `BASE_URL` to your provider's API endpoint.
 
 4. Update the models configuration file. An example `models.json` file is included in the project root for configuring models. Refer to the [Configuration](#configuration) section for details on its structure.
 
@@ -75,7 +75,7 @@ To get started, follow these steps:
 The proxy's behavior is primarily configured through a `models.json` file in the root directory of the project. This file defines the models available to Raycast and their specific settings. An example `models.json` file is included in this repository. Each entry in the JSON array represents a model and can include the following properties:
 
 - `name`: The name of the model as it will appear in Raycast.
-- `id`: The OpenRouter model ID. This is the identifier OpenRouter uses for the model.
+- `id`: The model ID in the format expected by your provider.
 - `contextLength`: The maximum context length (in tokens) the model supports. Only affects Raycast's UI and not the model itself.
 - `capabilities`: An array of strings indicating the model's capabilities.
   - `"vision"`: The model can process images.
@@ -83,7 +83,7 @@ The proxy's behavior is primarily configured through a `models.json` file in the
 - `temperature`: (Optional) Controls the creativity of the model. A value between 0 and 2.
 - `topP`: (Optional) Another parameter to control the randomness of the output, a value between 0 and 1.
 - `max_tokens`: (Optional) The maximum number of tokens the model is allowed to generate in a single response.
-- `extra`: (Optional) An object for advanced, OpenRouter-specific configurations. These options are passed directly to the OpenRouter API. For example, you can specify a preferred provider (`"provider": { "only": ["openai"] }`) or set the reasoning effort (`"reasoning": { "effort": "high" }`). Refer to the OpenRouter documentation for available parameters. Note that `extra` properties are not validated at startup. If you encounter issues, check the container logs after sending a request for any errors related to these settings.
+- `extra`: (Optional) An object for advanced, provider-specific configurations. These options are passed directly to the provider's API. For example, you can use it for OpenRouter-specific settings like specifying a preferred provider (`"provider": { "only": ["openai"] }`) or setting the reasoning effort for supported models (`"reasoning": { "effort": "high" }`). Refer to your provider's documentation for available parameters. Note that `extra` properties are not validated at startup. If you encounter issues, check the container logs after sending a request for any errors related to these settings.
 
 When you modify the `models.json` file, you need to restart the proxy server for the changes to take effect. You can do this by running:
 
@@ -91,7 +91,7 @@ When you modify the `models.json` file, you need to restart the proxy server for
 docker compose restart
 ```
 
-Example `models.json` structure:
+Example `models.json` structure for OpenRouter:
 
 ```json
 [
@@ -120,7 +120,6 @@ Example `models.json` structure:
     "id": "anthropic/claude-sonnet-4",
     "contextLength": 200000,
     "capabilities": ["vision", "tools"],
-    "temperature": 0.7,
     "extra": {
       "reasoning": {
         "max_tokens": 4000
@@ -138,11 +137,11 @@ Refer to the [Features](#features) section for a list of supported and unsupport
 
 ### Is a Raycast Pro subscription required to use this?
 
-No, one of the main benefits of this proxy is to enable the use of OpenRouter models within Raycast without needing a Raycast Pro subscription.
+No, one of the main benefits of this proxy is to enable the use of custom models within Raycast without needing a Raycast Pro subscription.
 
 ### Can I deploy this on a remote server?
 
-Yes, but it is generally not recommended. There is currently no authentication implemented, meaning anyone with access to your server's address could potentially make requests using your OpenRouter API key. You would need to implement your own authentication mechanism if you want to secure it for remote access.
+Yes, but it is generally not recommended. There is currently no authentication implemented, meaning anyone with access to your server's address could potentially make requests using your API key. You would need to implement your own authentication mechanism if you want to secure it for remote access.
 
 ### Do I need to install Ollama?
 
@@ -154,7 +153,7 @@ See the [Getting Started](#getting-started) section.
 
 ### How does this work?
 
-This proxy acts as an Ollama server, allowing Raycast to communicate with it. It translates requests from Raycast into a format that OpenRouter understands.
+This proxy acts as an Ollama server, allowing Raycast to communicate with it. It translates requests from Raycast into a format that the target OpenAI-compatible API understands.
 
 ### I updated the model configuration, but it doesn't seem to take effect. What should I do?
 

@@ -48,11 +48,6 @@ export const makeApiController = ({ openai, models }: AppContext): ApiController
         model: modelConfig.id,
         messages: openaiMessages,
         stream: true,
-        // @ts-expect-error reasoning is not officially supported by the SDK but works with OpenRouter
-        reasoning: {
-          ...modelConfig.extra?.reasoning,
-          exclude: true,
-        },
         stream_options: { include_usage: true },
         temperature: modelConfig.temperature,
         top_p: modelConfig.topP,
