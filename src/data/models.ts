@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import { z } from 'zod/v4';
+import OpenAI from 'openai';
 
 export const ModelConfig = z.object({
   name: z.string(),
@@ -12,6 +13,8 @@ export const ModelConfig = z.object({
   topP: z.number().min(0).max(1).optional(),
   max_tokens: z.int().min(1).optional(),
   extra: z.record(z.string(), z.any()).optional(),
+  baseUrl: z.url().optional(),
+  apiKey: z.string().optional(),
 });
 export type ModelConfig = z.infer<typeof ModelConfig>;
 
@@ -82,4 +85,28 @@ export const generateModelInfo = (models: ModelConfig[], modelName: string) => {
     },
     capabilities: ['completion', ...config.capabilities],
   };
+};
+
+/**
+ * 为指定的模型配置创建 OpenAI 实例
+ * 如果模型配置中包含 baseUrl 和 apiKey，则使用这些配置创建独立的实例
+ * 否则返回 null，表示应该使用默认的 OpenAI 实例
+ */
+export const createOpenAIInstanceForModel = (config: ModelConfig): OpenAI | null => {
+  if (config.baseUrl && config.apiKey) {
+    return new OpenAI({
+      baseURL: config.baseUrl,
+      apiKey: config.apiKey,
+    });
+  }
+  return null;
+};
+
+/**
+ * 获取用于指定模型的 OpenAI 实例
+ * 优先使用模型特定的配置，如果没有则使用默认实例
+ */
+export const getOpenAIInstanceForModel = (config: ModelConfig, defaultOpenAI: OpenAI): OpenAI => {
+  const modelSpecificInstance = createOpenAIInstanceForModel(config);
+  return modelSpecificInstance || defaultOpenAI;
 };

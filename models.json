@@ -14,9 +14,19 @@
     "temperature": 0
   },
   {
-    "name": "DeepSeek V3",
-    "id": "deepseek/deepseek-chat-v3-0324",
+    "name": "DeepSeek R1",
+    "id": "deepseek-reasoner",
     "contextLength": 128000,
+    "apiKey": "sk-6db4c8028ba845059966ca969f63a109",
+    "baseUrl": "https://api.deepseek.com/v1",
+    "capabilities": ["tools"]
+  },
+  {
+    "name": "DeepSeek V3",
+    "id": "deepseek-chat",
+    "contextLength": 128000,
+    "apiKey": "sk-6db4c8028ba845059966ca969f63a109",
+    "baseUrl": "https://api.deepseek.com/v1",
     "capabilities": ["tools"]
   },
   {
@@ -31,5 +41,23 @@
     "contextLength": 200000,
     "capabilities": ["vision", "tools"],
     "temperature": 0.7
+  },
+  {
+    "name": "Qwen 3",
+    "id": "qwen3-235b-a22b",
+    "contextLength": 32768,
+    "capabilities": ["tools"],
+    "temperature": 0.7,
+    "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "apiKey": "sk-c0cbbfcb86e34e1c8c26fbd6cab7b35e"
+  },
+  {
+    "name": "Qwen Turbo",
+    "id": "qwen-turbo-latest",
+    "contextLength": 32768,
+    "capabilities": ["tools"],
+    "temperature": 0.7,
+    "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "apiKey": "sk-c0cbbfcb86e34e1c8c26fbd6cab7b35e"
   }
 ]

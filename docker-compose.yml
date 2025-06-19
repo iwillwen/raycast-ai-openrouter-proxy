@@ -16,7 +16,7 @@ services:
       # For production environments, it's highly recommended to use
       # a .env file or Docker secrets for sensitive information like API keys,
       # rather than hardcoding them here.
-      - API_KEY=YOUR_API_KEY
+      - API_KEY=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
       # Set the base URL for the API.
       # This should be an OpenAI-compatible API endpoint.
       # The default is OpenRouter.

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { generateModelsList, generateModelInfo, findModelConfig } from '../data/models';
+import { generateModelsList, generateModelInfo, findModelConfig, getOpenAIInstanceForModel } from '../data/models';
 import { HttpError } from '../errors';
 import { AppContext } from '../app';
 import {
@@ -40,6 +40,9 @@ export const makeApiController = ({ openai, models }: AppContext): ApiController
         throw new HttpError(400, `Model ${requestedModel} not found`);
       }
 
+      // 获取用于此模型的 OpenAI 实例（可能是模型特定的实例或默认实例）
+      const modelOpenAI = getOpenAIInstanceForModel(modelConfig, openai);
+
       const openaiMessages = convertOllamaMessagesToOpenAI(messages);
       const openaiTools = convertRaycastToolsToOpenAI(tools);
 
@@ -71,7 +74,7 @@ export const makeApiController = ({ openai, models }: AppContext): ApiController
       };
 
       try {
-        const stream = await openai.chat.completions.create(chatConfig, {
+        const stream = await modelOpenAI.chat.completions.create(chatConfig, {
           signal: abortController.signal,
         });
 
