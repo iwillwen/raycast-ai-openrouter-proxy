@@ -203,3 +203,12 @@ export function convertRaycastToolsToOpenAI(
 export function makeSSEMessage(message: OllamaChunkResponse): string {
   return `${JSON.stringify(message)}\n\n`;
 }
+
+// Re-export functions from models.ts
+export {
+  findModelConfig,
+  generateModelInfo,
+  generateModelsList,
+  getOpenAIInstanceForModel,
+  fetchLocalOllamaModels,
+} from './data/models';

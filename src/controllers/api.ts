@@ -1,7 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
-import { generateModelsList, generateModelInfo, findModelConfig, getOpenAIInstanceForModel } from '../data/models';
-import { HttpError } from '../errors';
+import { ChatCompletionChunk, ChatCompletionCreateParamsStreaming } from 'openai/resources';
+import { match, P } from 'ts-pattern';
+import { z } from 'zod/v4';
 import { AppContext } from '../app';
+import {
+  fetchLocalOllamaModels,
+  findModelConfig,
+  generateModelInfo,
+  generateModelsList,
+  getOpenAIInstanceForModel,
+} from '../data/models';
+import { HttpError } from '../errors';
 import {
   convertOllamaMessagesToOpenAI,
   convertRaycastToolsToOpenAI,
@@ -10,8 +19,6 @@ import {
   OllamaChatRequest,
   OllamaChunkResponse,
 } from '../util';
-import { ChatCompletionCreateParamsStreaming, ChatCompletionChunk } from 'openai/resources';
-import { z } from 'zod/v4';
 
 export interface ApiController {
   getTags(req: Request, res: Response, next: NextFunction): void;
@@ -21,20 +28,27 @@ export interface ApiController {
 
 export const makeApiController = ({ openai, models }: AppContext): ApiController => {
   return {
-    getTags: (req, res) => {
-      res.send(generateModelsList(models));
+    getTags: async (req, res) => {
+      const modelsList = await generateModelsList(models);
+      res.send(modelsList);
     },
 
-    getModelInfo: (req, res) => {
+    getModelInfo: async (req, res) => {
       const { model } = z.object({ model: z.string() }).parse(req.body);
-      const modelInfo = generateModelInfo(models, model);
+      const modelInfo = await generateModelInfo(models, model);
       res.send(modelInfo);
     },
 
     chatCompletion: async (req, res) => {
       const { messages, model: requestedModel, tools } = OllamaChatRequest.parse(req.body);
 
-      const modelConfig = findModelConfig(models, requestedModel);
+      // 获取本地 Ollama 模型
+      const localModels = await fetchLocalOllamaModels();
+
+      // 合并配置文件中的模型和本地 Ollama 模型
+      const allModels = [...models, ...localModels];
+
+      const modelConfig = findModelConfig(allModels, requestedModel);
 
       if (!modelConfig) {
         throw new HttpError(400, `Model ${requestedModel} not found`);
@@ -96,13 +110,64 @@ export const makeApiController = ({ openai, models }: AppContext): ApiController
 
         const finalToolCalls: Record<number, ChatCompletionChunk.Choice.Delta.ToolCall> = {};
         let finish_reason: OllamaChunkResponse['done_reason'] = undefined;
+        let reasoning = false;
 
         for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content;
-          const toolCalls = chunk.choices[0]?.delta?.tool_calls;
+          const delta = chunk.choices[0]?.delta;
+          if (!delta) continue;
 
-          if (content) {
-            const ollamaChunk = makeOllamaChunk(requestedModel, content, false);
+          const reasoning_content = (delta as { reasoning_content?: string }).reasoning_content;
+          const content = delta?.content;
+
+          const toolCalls = delta?.tool_calls;
+
+          // 处理 reasoning_content 和 content 的整合输出
+          let outputContent = '';
+
+          match({
+            reasoning_content,
+            content,
+            reasoning: reasoning as boolean,
+          })
+            .with(
+              { reasoning: false, reasoning_content: P.string.minLength(1) },
+              ({ reasoning_content }) => {
+                reasoning = true;
+
+                const thinkTagChunk = makeOllamaChunk(requestedModel, '<think>', false);
+                res.write(makeSSEMessage(thinkTagChunk));
+
+                outputContent = reasoning_content;
+              },
+            )
+            .with(
+              { reasoning: true, reasoning_content: P.string.minLength(1) },
+              ({ reasoning_content }) => {
+                outputContent = reasoning_content ?? '';
+              },
+            )
+            .with(
+              { reasoning: true, content: P.string.minLength(1) },
+              ({ reasoning_content, content }) => {
+                reasoning = false;
+
+                if (reasoning_content) {
+                  const reasoningChunk = makeOllamaChunk(requestedModel, reasoning_content, false);
+                  res.write(makeSSEMessage(reasoningChunk));
+                }
+
+                const thinkTagChunk = makeOllamaChunk(requestedModel, '</think>', false);
+                res.write(makeSSEMessage(thinkTagChunk));
+
+                outputContent = content;
+              },
+            )
+            .otherwise(() => {
+              outputContent = content ?? '';
+            });
+
+          if (outputContent) {
+            const ollamaChunk = makeOllamaChunk(requestedModel, outputContent, false);
             res.write(makeSSEMessage(ollamaChunk));
           }
 

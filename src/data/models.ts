@@ -8,7 +8,7 @@ export const ModelConfig = z.object({
   name: z.string(),
   id: z.string(),
   contextLength: z.number(),
-  capabilities: z.array(z.enum(['vision', 'tools'])),
+  capabilities: z.array(z.enum(['vision', 'tools', 'thinking'])),
   temperature: z.number().min(0).max(2).optional(),
   topP: z.number().min(0).max(1).optional(),
   max_tokens: z.int().min(1).optional(),
@@ -36,9 +36,57 @@ function generateDigest(modelName: string): string {
   return crypto.createHash('sha256').update(modelName).digest('hex');
 }
 
-export const generateModelsList = (models: ModelConfig[]) => {
+/**
+ * 获取本地 Ollama 服务的模型列表
+ */
+export const fetchLocalOllamaModels = async (): Promise<ModelConfig[]> => {
+  try {
+    const response = await fetch('http://localhost:11434/api/tags');
+    if (!response.ok) {
+      console.warn('Failed to fetch local Ollama models:', response.statusText);
+      return [];
+    }
+
+    interface OllamaModel {
+      name: string;
+      model?: string;
+      modified_at?: string;
+      size?: number;
+      digest?: string;
+    }
+
+    interface OllamaResponse {
+      models?: OllamaModel[];
+    }
+
+    const data = (await response.json()) as OllamaResponse;
+    const localModels: ModelConfig[] =
+      data.models?.map((model: OllamaModel) => ({
+        name: `${model.name} [Local]`,
+        id: model.name,
+        contextLength: 4096, // Default context length for local models
+        capabilities: ['tools'], // Default capabilities
+        temperature: 0.7,
+        baseUrl: 'http://localhost:11434/v1',
+        apiKey: 'ollama', // Dummy API key for local Ollama
+      })) || [];
+
+    return localModels;
+  } catch (error) {
+    console.warn('Error fetching local Ollama models:', error);
+    return [];
+  }
+};
+
+export const generateModelsList = async (models: ModelConfig[]) => {
+  // 获取本地 Ollama 模型
+  const localModels = await fetchLocalOllamaModels();
+
+  // 合并配置文件中的模型和本地 Ollama 模型
+  const allModels = [...models, ...localModels];
+
   return {
-    models: models.map((config) => ({
+    models: allModels.map((config) => ({
       name: config.name,
       model: config.id,
       modified_at: new Date().toISOString(),
@@ -56,8 +104,14 @@ export const generateModelsList = (models: ModelConfig[]) => {
   };
 };
 
-export const generateModelInfo = (models: ModelConfig[], modelName: string) => {
-  const config = findModelConfig(models, modelName);
+export const generateModelInfo = async (models: ModelConfig[], modelName: string) => {
+  // 获取本地 Ollama 模型
+  const localModels = await fetchLocalOllamaModels();
+
+  // 合并配置文件中的模型和本地 Ollama 模型
+  const allModels = [...models, ...localModels];
+
+  const config = findModelConfig(allModels, modelName);
 
   if (!config) {
     throw new Error(`Model ${modelName} not found`);

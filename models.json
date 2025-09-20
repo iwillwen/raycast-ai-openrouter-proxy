@@ -1,16 +1,46 @@
 [
   {
+    "name": "GLM 4.5-AirX",
+    "id": "glm-4.5-airx",
+    "contextLength": 128000,
+    "apiKey": "a5faf3d43b1d4ee580119c8ce32317c7.taxQQLQ9jZnAtSgq",
+    "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+    "capabilities": [
+      "tools",
+      "thinking"
+    ]
+  },
+  {
+    "name": "GLM 4.5V",
+    "id": "glm-4.5v",
+    "contextLength": 128000,
+    "apiKey": "a5faf3d43b1d4ee580119c8ce32317c7.taxQQLQ9jZnAtSgq",
+    "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+    "capabilities": [
+      "vision",
+      "tools",
+      "thinking"
+    ]
+  },
+  {
     "name": "Gemini 2.5 Flash",
     "id": "google/gemini-2.5-flash-preview-05-20",
     "contextLength": 1000000,
-    "capabilities": ["vision", "tools"],
+    "capabilities": [
+      "vision",
+      "tools"
+    ],
     "temperature": 0
   },
   {
     "name": "Gemini 2.5 Flash Thinking",
     "id": "google/gemini-2.5-flash-preview-05-20:thinking",
     "contextLength": 1000000,
-    "capabilities": ["vision", "tools"],
+    "capabilities": [
+      "vision",
+      "tools",
+      "thinking"
+    ],
     "temperature": 0
   },
   {
@@ -19,7 +49,10 @@
     "contextLength": 128000,
     "apiKey": "sk-6db4c8028ba845059966ca969f63a109",
     "baseUrl": "https://api.deepseek.com/v1",
-    "capabilities": ["tools"]
+    "capabilities": [
+      "tools",
+      "thinking"
+    ]
   },
   {
     "name": "DeepSeek V3",
@@ -27,26 +60,37 @@
     "contextLength": 128000,
     "apiKey": "sk-6db4c8028ba845059966ca969f63a109",
     "baseUrl": "https://api.deepseek.com/v1",
-    "capabilities": ["tools"]
+    "capabilities": [
+      "tools"
+    ]
   },
   {
     "name": "GPT-4o Mini",
     "id": "openai/gpt-4o-mini",
     "contextLength": 128000,
-    "capabilities": ["vision", "tools"]
+    "capabilities": [
+      "vision",
+      "tools"
+    ]
   },
   {
     "name": "Claude Sonnet 4",
     "id": "anthropic/claude-sonnet-4",
     "contextLength": 200000,
-    "capabilities": ["vision", "tools"],
+    "capabilities": [
+      "vision",
+      "tools"
+    ],
     "temperature": 0.7
   },
   {
     "name": "Qwen 3",
     "id": "qwen3-235b-a22b",
     "contextLength": 32768,
-    "capabilities": ["tools"],
+    "capabilities": [
+      "tools",
+      "thinking"
+    ],
     "temperature": 0.7,
     "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "apiKey": "sk-c0cbbfcb86e34e1c8c26fbd6cab7b35e"
@@ -55,7 +99,22 @@
     "name": "Qwen Turbo",
     "id": "qwen-turbo-latest",
     "contextLength": 32768,
-    "capabilities": ["tools"],
+    "capabilities": [
+      "tools",
+      "thinking"
+    ],
+    "temperature": 0.7,
+    "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "apiKey": "sk-c0cbbfcb86e34e1c8c26fbd6cab7b35e"
+  },
+  {
+    "name": "QVQ Max",
+    "id": "qvq-max",
+    "contextLength": 128000,
+    "capabilities": [
+      "vision",
+      "tools"
+    ],
     "temperature": 0.7,
     "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "apiKey": "sk-c0cbbfcb86e34e1c8c26fbd6cab7b35e"

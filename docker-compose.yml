@@ -6,7 +6,7 @@ services:
     # Change the host port if needed.
     # You need to set this port in Raycast settings.
     ports:
-      - "11435:3000"
+      - '11435:3000'
     # Mount the local 'models.json' file into the container.
     # This file contains the model definitions used by the proxy.
     volumes:
@@ -21,3 +21,4 @@ services:
       # This should be an OpenAI-compatible API endpoint.
       # The default is OpenRouter.
       - BASE_URL=https://openrouter.ai/api/v1
+      - OLLAMA_BASE_URL=http://172.17.0.1:11434/v1
